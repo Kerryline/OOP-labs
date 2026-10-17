@@ -54,8 +54,6 @@ Matrix::Matrix(const Matrix& other)
         return;
     }
 
-    // Глубокое копирование: выделяем НОВУЮ память и копируем значения,
-    // а не указатели — иначе два объекта владели бы одной памятью.
     data_ = new int*[rows_];
     for (int i = 0; i < rows_; ++i) {
         data_[i] = new int[cols_]{};

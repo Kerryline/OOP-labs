@@ -9,7 +9,7 @@ public:
     explicit Matrix(int size);
     Matrix(int rows, int cols);
 
-    // Конструктор копирования (глубокое копирование)
+    // Конструктор копирования
     Matrix(const Matrix& other);
 
     // Деструктор
