@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <cstdlib>
 #include <ctime>
+#include <algorithm>
 #include <vector>
 
 using namespace std;
@@ -68,32 +69,31 @@ void fillByLeftDiagonals(int** matrix, int N, int* D) {
 // c) по спирали, начиная с центрального элемента
 void fillBySpiralFromCenter(int** matrix, int N, int* D) {
     int idx = 0;
-    int ci = N / 2, cj = N / 2;
+    int ci = N / 2, cj = N / 2;   // центр (для чётного N берём правый нижний из четырёх центральных)
 
-    vector<vector<bool>> visited(N, vector<bool>(N, false));
-    int di[] = {0, 1, 0, -1}; // вправо, вниз, влево, вверх
-    int dj[] = {1, 0, -1, 0};
+    // Спираль = кольцо за кольцом: слой l состоит из клеток,
+    // расстояние до центра по строке/столбцу которых равно l.
+    int maxLayer = max(max(ci, N - 1 - ci), max(cj, N - 1 - cj));
 
-    int i = ci, j = cj;
-    D[idx++] = matrix[i][j];
-    visited[i][j] = true;
+    for (int l = 0; l <= maxLayer; ++l) {
+        int top    = max(0, ci - l);
+        int bottom = min(N - 1, ci + l);
+        int left   = max(0, cj - l);
+        int right  = min(N - 1, cj + l);
 
-    int dir = 0;
-    int steps = 1;
-
-    while (idx < N * N) {
-        for (int k = 0; k < 2 && idx < N * N; ++k) {
-            for (int s = 0; s < steps && idx < N * N; ++s) {
-                i += di[dir];
-                j += dj[dir];
-                if (i >= 0 && i < N && j >= 0 && j < N && !visited[i][j]) {
-                    D[idx++] = matrix[i][j];
-                    visited[i][j] = true;
-                }
+        // Записываем периметр кольца по часовой стрелке:
+        // верхняя строка → правый столбец → нижняя строка → левый столбец.
+        // Фильтр dist==l нужен для чётного N: из-за смещённого центра
+        // кольца неровные, часть клеток периметра уже записана раньше.
+        auto emit = [&](int i, int j) {
+            if (max(abs(i - ci), abs(j - cj)) == l) {
+                D[idx++] = matrix[i][j];
             }
-            dir = (dir + 1) % 4;
-        }
-        ++steps;
+        };
+        for (int j = left; j <= right; ++j) emit(top, j);
+        for (int i = top + 1; i <= bottom; ++i) emit(i, right);
+        for (int j = right - 1; j >= left; --j) emit(bottom, j);
+        for (int i = bottom - 1; i > top; --i) emit(i, left);
     }
 }
 
