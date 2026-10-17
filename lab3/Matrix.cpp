@@ -47,6 +47,24 @@ Matrix::Matrix(int rows, int cols)
     }
 }
 
+Matrix::Matrix(const Matrix& other)
+    : data_(nullptr), rows_(other.rows_), cols_(other.cols_)
+{
+    if (rows_ == 0 || cols_ == 0 || other.data_ == nullptr) {
+        return;
+    }
+
+    // Глубокое копирование: выделяем НОВУЮ память и копируем значения,
+    // а не указатели — иначе два объекта владели бы одной памятью.
+    data_ = new int*[rows_];
+    for (int i = 0; i < rows_; ++i) {
+        data_[i] = new int[cols_]{};
+        for (int j = 0; j < cols_; ++j) {
+            data_[i][j] = other.data_[i][j];
+        }
+    }
+}
+
 Matrix::~Matrix() {
     if (data_ == nullptr) {
         return;
